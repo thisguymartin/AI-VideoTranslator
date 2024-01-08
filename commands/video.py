@@ -17,8 +17,7 @@ def create_user(input: str, output: str):
         audio = video.audio
         
         file_name = os.path.basename(output)
-
-        audio.write_audiofile(file_name, verbose=False)
+        audio.write_audiofile(file_name,codec='pcm_s16le')
         print("Done extracting audio from video.")
 
 
