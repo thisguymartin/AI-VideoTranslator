@@ -1,7 +1,7 @@
 # AI-VideoTranslator
 
-## Description
-Briefly describe what your project does.
+## Objective
+Develop a versatile tool for automatic subtitle generation from video audio, translating these subtitles into multiple languages, and embedding them back into the video. This user-friendly tool will leverage AI for accurate transcription and translation.
 
 ## Installation
 
