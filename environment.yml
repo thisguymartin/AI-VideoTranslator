@@ -11,6 +11,8 @@ dependencies:
   - certifi=2023.11.17=py312hca03da5_0
   - cffi=1.16.0=py312h80987f9_0
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
+  - click=8.1.7=py312hca03da5_0
+  - colorama=0.4.6=py312hca03da5_0
   - cryptography=41.0.7=py312hd4332d6_0
   - decorator=5.1.1=pyhd3eb1b0_0
   - expat=2.5.0=h313beb8_0
@@ -51,6 +53,8 @@ dependencies:
   - libxml2=2.10.4=h0dcf63f_1
   - llvm-openmp=17.0.6=hcd81f8e_0
   - lz4-c=1.9.4=h313beb8_0
+  - markdown-it-py=2.2.0=py312hca03da5_1
+  - mdurl=0.1.0=py312hca03da5_0
   - moviepy=1.0.3=pyhd8ed1ab_1
   - ncurses=6.4=h313beb8_0
   - nettle=3.7.3=h84b5d62_1
@@ -64,15 +68,21 @@ dependencies:
   - pip=23.3.1=py312hca03da5_0
   - proglog=0.1.9=py_0
   - pycparser=2.21=pyhd3eb1b0_0
+  - pygments=2.15.1=py312hca03da5_1
   - pyopenssl=23.2.0=py312hca03da5_0
   - pysocks=1.7.1=py312hca03da5_0
   - python=3.12.0=h99e199e_0
   - readline=8.2=h1a28f6b_0
   - requests=2.31.0=py312hca03da5_0
+  - rich=13.3.5=py312hca03da5_1
   - setuptools=68.2.2=py312hca03da5_0
+  - shellingham=1.5.0=py312hca03da5_0
   - sqlite=3.41.2=h80987f9_0
   - tk=8.6.12=hb8d0fd4_0
   - tqdm=4.65.0=py312h989b03a_0
+  - typer=0.9.0=pyhd8ed1ab_0
+  - typing-extensions=4.7.1=py312hca03da5_0
+  - typing_extensions=4.7.1=py312hca03da5_0
   - tzdata=2023d=h04d1e81_0
   - urllib3=1.26.18=py312hca03da5_0
   - wheel=0.41.2=py312hca03da5_0
