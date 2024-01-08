@@ -13,7 +13,7 @@ git clone https://github.com/yourusername/your-repo-name.git
 cd your-repo-name
 ```
 
-### Setting Up the Environment
+### Setting Up the Environment with PIP
 It's recommended to use a virtual environment:
 ```bash
 python -m venv venv
@@ -25,6 +25,21 @@ Install the required packages using:
 ```bash
 pip install -r requirements.txt
 ```
+
+### Setting Up a Conda Environment Conda
+Create and activate a Conda environment:
+```bash
+conda create --name myenv python=3.8
+conda activate myenv
+```
+Replace `myenv` with your desired environment name and adjust the Python version as needed.
+
+### Installing Dependencies
+Install the required packages defined in `environment.yml`:
+```bash
+conda env update --file environment.yml
+```
+
 
 ## Usage
 
