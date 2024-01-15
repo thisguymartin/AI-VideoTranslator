@@ -1,79 +1,78 @@
 # AI-VideoTranslator
 
 ## Objective
-Develop a versatile tool for automatic subtitle generation from video audio, translating these subtitles into multiple languages, and embedding them back into the video. This user-friendly tool will leverage AI for accurate transcription and translation.
+The AI-VideoTranslator is a powerful command-line tool designed to automate the process of subtitle generation from video audio, translating these subtitles into multiple languages, and embedding them back into the video. This tool leverages the power of AI for accurate transcription and translation, making it an invaluable resource for content creators, translators, and anyone in need of automated subtitle generation and translation.
+
+## Prerequisites
+This tool uses [FFmpeg](https://ffmpeg.org/), a free and open-source software project consisting of a vast software suite of libraries and programs for handling video, audio, and other multimedia files and streams. Make sure you have FFmpeg installed on your system. You can download it from the [official FFmpeg website](https://ffmpeg.org/download.html).
 
 ## Installation
 
-To get started with this project, clone the repository and install the required packages.
-
 ### Cloning the Repository
+To get started with the AI-VideoTranslator, you first need to clone the repository to your local machine. You can do this by running the following command in your terminal:
+
 ```bash
 git clone https://github.com/yourusername/your-repo-name.git
 cd your-repo-name
 ```
 
+Please replace `yourusername` and `your-repo-name` with your actual GitHub username and repository name.
+
 ### Setting Up the Environment with PIP
-It's recommended to use a virtual environment:
+We recommend using a virtual environment to avoid any package conflicts. You can set up a virtual environment using the venv module in Python:
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 ```
 
+This will create a new virtual environment in a folder named venv and activate it.
+
 ### Installing Dependencies
-Install the required packages using:
+Once you have your virtual environment set up and activated, you can install the required packages using pip:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### Setting Up a Conda Environment Conda
-Create and activate a Conda environment:
+This command reads the requirements.txt file and installs all the necessary packages listed in it.
+
+### Setting Up a Conda Environment
+If you prefer using Conda, you can create and activate a Conda environment:
+
 ```bash
 conda create --name myenv python=3.8
 conda activate myenv
 ```
+
 Replace `myenv` with your desired environment name and adjust the Python version as needed.
 
-### Installing Dependencies
-Install the required packages defined in [`environment.yml`](command:_github.copilot.openRelativePath?%5B%22environment.yml%22%5D "environment.yml"):
+### Installing Dependencies with Conda
+Install the required packages defined in `environment.yml`:
+
 ```bash
 conda env update --file environment.yml
 ```
 
-### Installing FFmpeg
-FFmpeg is a free and open-source software project consisting of a large suite of libraries and programs for handling video, audio, and other multimedia files and streams. This project uses FFmpeg for audio extraction and video processing.
-
-You can install FFmpeg on your system using the following commands:
-
-#### For Ubuntu:
-```bash
-sudo apt update
-sudo apt install ffmpeg
-```
-
-#### For MacOS:
-```bash
-brew install ffmpeg
-```
-
-#### For Windows:
-You can download FFmpeg from the [official FFmpeg website](https://ffmpeg.org/download.html). Extract the downloaded zip file. Add the bin folder from the extracted file to the System Environment Variable PATH.
-
 ## Usage
 
-Run the application using:
+### Using AWS Transcribe to Generate Subtitles
+To use AWS Transcribe for generating subtitles, you can use the following command:
+
 ```bash
-python main.py
+python main.py video extract-audio-aws ~/Downloads/output.mp4 ~/Downloads/ anakin.test.1171
 ```
 
-### CLI Commands
-- **Extract Audio from Video and Upload to AWS for Transcription**:
-  ```bash
-  python main.py video extract-audio-aws --input INPUT_PATH --output OUTPUT_PATH --s3 S3_BUCKET_NAME
-  ```
-  Replace `INPUT_PATH` and `OUTPUT_PATH` with your video and desired output file paths. Replace `S3_BUCKET_NAME` with the name of your S3 bucket.
+In this command, `~/Downloads/output.mp4` is the path to your video file, `~/Downloads/` is the directory where you want to save the output, and `anakin.test.1171` is the name of the job that will be created in AWS Transcribe.
 
-  For example:
-  ```bash
-  python main.py video extract-audio-aws --input ~/Downloads/output.mp4 --output ~/Downloads/ --s3 anakin.test.1171
-  ```
+### Extracting Audio and Converting to WAV
+If you only want to extract the audio from the video and convert it to a WAV file, you can use the following command:
+
+```bash
+python main.py video extract-audio ~/Downloads/output.mp4 ~/Downloads/
+```
+
+Again, `~/Downloads/output.mp4` is the path to your video file and `~/Downloads/` is the directory where you want to save the output.
+
+## Note
+The AI-VideoTranslator is still in active development. Currently, it only supports AWS Transcribe for generating subtitles. However, we are working on adding support for other transcription services in the future.
