@@ -1,0 +1,57 @@
+aiohttp @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_6fjtz5frfh/croot/aiohttp_1701112546765/work
+aiosignal @ file:///tmp/build/80754af9/aiosignal_1637843061372/work
+attrs @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/attrs_1699281960663/work
+azure-cognitiveservices-speech==1.34.0
+boto3 @ file:///opt/conda/conda-bld/boto3_1649078879353/work
+botocore @ file:///opt/conda/conda-bld/botocore_1649076662316/work
+Brotli @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/brotli-split_1699237319520/work
+cachetools @ file:///tmp/build/80754af9/cachetools_1619597386817/work
+certifi @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/certifi_1701805090354/work/certifi
+cffi @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_b4nang6w_y/croot/cffi_1700254307954/work
+charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
+click @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/click_1699237822453/work
+colorama @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/colorama_1699282140182/work
+cryptography @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b1p0q5vizk/croot/cryptography_1702070293829/work
+decorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work
+ffmpeg-python==0.2.0
+frozenlist @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/frozenlist_1699254257028/work
+future @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/future_1699242175162/work
+google-api-core @ file:///home/conda/feedstock_root/build_artifacts/google-api-core-split_1686812029898/work
+google-auth @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/google-auth_1701805220194/work
+google-cloud-speech @ file:///home/conda/feedstock_root/build_artifacts/google-cloud-speech_1702004625871/work
+googleapis-common-protos @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/googleapis-common-protos-feedstock_1701805242004/work
+grpcio @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_7bxiys9u3r/croot/grpc-suite_1701982575666/work
+grpcio-status @ file:///home/conda/feedstock_root/build_artifacts/grpcio-status_1662108958711/work
+idna @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/idna_1699237644810/work
+imageio @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/imageio_1699242206705/work
+imageio-ffmpeg @ file:///home/conda/feedstock_root/build_artifacts/imageio-ffmpeg_1694632425602/work
+jmespath @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/jmespath_1701804490553/work
+markdown-it-py @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/markdown-it-py_1699237863445/work
+mdurl @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/mdurl_1699237660008/work
+moviepy @ file:///home/conda/feedstock_root/build_artifacts/moviepy_1665160419595/work
+multidict @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_10voz9m15i/croot/multidict_1701096890858/work
+numpy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_cfbbnu3tzv/croot/numpy_and_numpy_base_1704311724719/work/dist/numpy-1.26.3-cp312-cp312-macosx_11_0_arm64.whl#sha256=e066d59974be230052477e95f2633cdef4c4987c2f32c15291d3f4b184022bdc
+Pillow @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pillow_1699239265580/work
+proglog==0.1.9
+proto-plus @ file:///home/conda/feedstock_root/build_artifacts/proto-plus_1702003338643/work
+protobuf==3.20.3
+pyasn1 @ file:///Users/ktietz/demo/mc3/conda-bld/pyasn1_1629708007385/work
+pyasn1-modules==0.2.8
+pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+Pygments @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pygments_1699238063295/work
+pyOpenSSL @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyopenssl_1699241567078/work
+PySocks @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pysocks_1699237568675/work
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+requests @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/requests_1699238126620/work
+rich @ file:///home/conda/feedstock_root/build_artifacts/rich-split_1700160075651/work/dist
+rsa @ file:///tmp/build/80754af9/rsa_1614366226499/work
+s3transfer @ file:///tmp/build/80754af9/s3transfer_1626435152308/work
+setuptools==68.2.2
+shellingham @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/shellingham_1699238695807/work
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+tqdm @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/tqdm_1701805884490/work
+typer @ file:///home/conda/feedstock_root/build_artifacts/typer_1683029246636/work
+typing_extensions @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/typing_extensions_1699237056256/work
+urllib3 @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/urllib3_1699237745193/work
+wheel==0.41.2
+yarl @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a8s46tbbn5/croot/yarl_1701105147904/work
