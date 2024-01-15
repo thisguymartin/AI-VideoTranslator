@@ -12,11 +12,9 @@ This tool uses [FFmpeg](https://ffmpeg.org/), a free and open-source software pr
 To get started with the AI-VideoTranslator, you first need to clone the repository to your local machine. You can do this by running the following command in your terminal:
 
 ```bash
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
+git clone git@github.com:thisguymartin/AI-VideoTranslator.git
+cd AI-VideoTranslator
 ```
-
-Please replace `yourusername` and `your-repo-name` with your actual GitHub username and repository name.
 
 ### Setting Up the Environment with PIP
 We recommend using a virtual environment to avoid any package conflicts. You can set up a virtual environment using the venv module in Python:
