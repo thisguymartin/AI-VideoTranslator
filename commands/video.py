@@ -1,24 +1,27 @@
-# users.py
 import typer
-from moviepy.editor import *
-from rich.progress import Progress, SpinnerColumn, TextColumn
+from lib.aws.aws_transcript import process_audio_file_with_aws
+from lib.ffmpeg.extract_wav_from_video import extract_wav_from_video
+from rich import print
 
 app = typer.Typer()
 
 @app.command("extract-audio")
-def create_user(input: str, output: str):
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        transient=True,
-    ) as progress:
-        progress.add_task(description="Processing...")
-        video = VideoFileClip(input, verbose=False)
-        audio = video.audio
-        
-        file_name = os.path.basename(output)
-
-        audio.write_audiofile(file_name, verbose=False)
-        print("Done extracting audio from video.")
+def extract_audio(input: str, output: str):
+    """Extract audio from video and save to output file"""
+    try:
+        wav_file = extract_wav_from_video(input, output)
+        print("[bold green]Extract Audio: [/bold green] 🥳 🎉", wav_file)  
+    except Exception as e:
+        print("[bold red] ❌ extract_audio error: [/bold red]", e)
+        raise typer.Exit(code=1)
 
 
+@app.command("extract-audio-aws")
+def extract_audio_aws(input: str, output: str, s3: str):
+    # """Extract audio from video and upload to AWS for transcription"""
+    try:
+        wav_file = extract_wav_from_video(input, output)
+        process_audio_file_with_aws(wav_file, output, s3, input)
+    except Exception as e:
+        print("[bold red] ❌ extract_audio_aws error: [/bold red]", e)
+        raise typer.Exit(code=1)
