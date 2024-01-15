@@ -21,7 +21,7 @@ def extract_audio_aws(input: str, output: str, s3: str):
     # """Extract audio from video and upload to AWS for transcription"""
     try:
         wav_file = extract_wav_from_video(input, output)
-        process_audio_file_with_aws(wav_file, output, s3)
+        process_audio_file_with_aws(wav_file, output, s3, input)
     except Exception as e:
         print("[bold red] ❌ extract_audio_aws error: [/bold red]", e)
         raise typer.Exit(code=1)
