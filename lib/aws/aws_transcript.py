@@ -1,10 +1,14 @@
 # https://docs.aws.amazon.com/transcribe/
 import json
+import tempfile
 import boto3
 import time
 import urllib.parse
 import os
 from rich import print
+
+from lib.aws.transcript_json_to_srt import convert_to_srt
+
 
 def upload_file_to_s3(local_file_path: str, bucket_name: str, s3_file_name: str):
     s3_client = boto3.client('s3')
@@ -30,12 +34,12 @@ def transcribe_audio(file_uri, transcribe_client):
     print("Transcription finished")
     return status['TranscriptionJob']['Transcript']['TranscriptFileUri']
 
-def process_audio_file_with_aws(local_file_path: str, bucket_name: str):
-    print("[yellow]Processing audio file with AWS...[/yellow]")
-    print("[yellow]local_file_path: [/yellow]", local_file_path)
-    print("[yellow]bucket_name: [/yellow]", bucket_name)
+def process_audio_file_with_aws(local_file_path: str, outputDir: str, bucket_name: str):
+    print("[yellow] 🎵 Processing audio file with AWS Transcript...[/yellow]")
+    print("[yellow] 📁 Local filepath: [/yellow]", local_file_path)
+    print("[yellow] 🪣 Bucket name: [/yellow]", bucket_name)
     
-    s3_file_name = os.path.basename(local_file_path)  # Name for the file in S3
+    s3_file_name = os.path.basename(local_file_path)
 
     # Upload the local file to S3
     s3_file_name_str = str(s3_file_name)
@@ -48,10 +52,26 @@ def process_audio_file_with_aws(local_file_path: str, bucket_name: str):
     
     # # Fetch and print the transcript
     transcript = urllib.request.urlopen(transcript_uri).read().decode('utf-8')
-    print("[green]Transcript:", transcript)
+    
+    print("[green] 🪣 ✅ Transcript:", transcript)
     
     # Open the file with write permission
     data = json.loads(transcript)
-    with open('transcripts.json', 'w') as file:
+    
+    # Create a temporary file to store the JSON transcript data
+    tempFileJson = tempfile.TemporaryFile()
+    
+    with open(tempFileJson, 'w') as file:
         file.write(json.dumps(data, indent=4))
-        print("[green] Transcripts saved to transcripts.json [/green]")
+        print("[green] ✅ Transcripts saved to transcripts.json [/green]")    
+
+    # Convert the transcript to SRT format
+    srt_content = convert_to_srt(data)
+
+    outputDir = outputDir + 'transcript.srt'
+    # Save the SRT file to disk in the same directory as the input file    
+    with open(outputDir, 'w') as file:
+        file.write(srt_content)
+
+    
+
