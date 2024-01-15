@@ -35,11 +35,29 @@ conda activate myenv
 Replace `myenv` with your desired environment name and adjust the Python version as needed.
 
 ### Installing Dependencies
-Install the required packages defined in `environment.yml`:
+Install the required packages defined in [`environment.yml`](command:_github.copilot.openRelativePath?%5B%22environment.yml%22%5D "environment.yml"):
 ```bash
 conda env update --file environment.yml
 ```
 
+### Installing FFmpeg
+FFmpeg is a free and open-source software project consisting of a large suite of libraries and programs for handling video, audio, and other multimedia files and streams. This project uses FFmpeg for audio extraction and video processing.
+
+You can install FFmpeg on your system using the following commands:
+
+#### For Ubuntu:
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+#### For MacOS:
+```bash
+brew install ffmpeg
+```
+
+#### For Windows:
+You can download FFmpeg from the [official FFmpeg website](https://ffmpeg.org/download.html). Extract the downloaded zip file. Add the bin folder from the extracted file to the System Environment Variable PATH.
 
 ## Usage
 
@@ -49,8 +67,13 @@ python main.py
 ```
 
 ### CLI Commands
-- **Extract Audio from Video**:
+- **Extract Audio from Video and Upload to AWS for Transcription**:
   ```bash
-  python main.py video extract-audio --input INPUT_PATH --output OUTPUT_PATH
+  python main.py video extract-audio-aws --input INPUT_PATH --output OUTPUT_PATH --s3 S3_BUCKET_NAME
   ```
-  Replace `INPUT_PATH` and `OUTPUT_PATH` with your video and desired output file paths.
+  Replace `INPUT_PATH` and `OUTPUT_PATH` with your video and desired output file paths. Replace `S3_BUCKET_NAME` with the name of your S3 bucket.
+
+  For example:
+  ```bash
+  python main.py video extract-audio-aws --input ~/Downloads/output.mp4 --output ~/Downloads/ --s3 anakin.test.1171
+  ```

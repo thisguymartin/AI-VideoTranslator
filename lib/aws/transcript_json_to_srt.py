@@ -1,4 +1,4 @@
-def convert_to_srt(transcript_data):
+def convert_to_srt(transcript_data: dict):
     """Convert AWS Transcribe JSON to SRT format."""
     srt_string = ''
     counter = 1

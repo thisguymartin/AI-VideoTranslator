@@ -8,6 +8,7 @@ import os
 from rich import print
 
 from lib.aws.transcript_json_to_srt import convert_to_srt
+from lib.ffmpeg.add_subtitles_to_video import add_subtitles_to_video
 
 
 def upload_file_to_s3(local_file_path: str, bucket_name: str, s3_file_name: str):
@@ -34,7 +35,7 @@ def transcribe_audio(file_uri, transcribe_client):
     print("Transcription finished")
     return status['TranscriptionJob']['Transcript']['TranscriptFileUri']
 
-def process_audio_file_with_aws(local_file_path: str, outputDir: str, bucket_name: str):
+def process_audio_file_with_aws(local_file_path: str, outputDir: str, bucket_name: str, video_file_path: str):
     print("[yellow] 🎵 Processing audio file with AWS Transcript...[/yellow]")
     print("[yellow] 📁 Local filepath: [/yellow]", local_file_path)
     print("[yellow] 🪣 Bucket name: [/yellow]", bucket_name)
@@ -54,24 +55,32 @@ def process_audio_file_with_aws(local_file_path: str, outputDir: str, bucket_nam
     transcript = urllib.request.urlopen(transcript_uri).read().decode('utf-8')
     
     print("[green] 🪣 ✅ Transcript:", transcript)
-    
-    # Open the file with write permission
-    data = json.loads(transcript)
-    
-    # Create a temporary file to store the JSON transcript data
-    tempFileJson = tempfile.TemporaryFile()
-    
-    with open(tempFileJson, 'w') as file:
-        file.write(json.dumps(data, indent=4))
-        print("[green] ✅ Transcripts saved to transcripts.json [/green]")    
+# Create a named temporary file to store the JSON transcript data
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tempFileJson:
+        # Write the transcript data to the temporary file
+        tempFileJson.write(json.dumps(transcript, indent=4))
+        tempFileName = tempFileJson.name
+
+    print("[green] ✅ Transcripts written to temporary file [/green]")
 
     # Convert the transcript to SRT format
+    data = json.loads(transcript)
     srt_content = convert_to_srt(data)
 
-    outputDir = outputDir + 'transcript.srt'
-    # Save the SRT file to disk in the same directory as the input file    
-    with open(outputDir, 'w') as file:
-        file.write(srt_content)
-
+    print("[green] ✅ Converted to SRT format [/green]") 
     
+    # Delete the temporary JSON file
+    os.remove(tempFileName)
+    
+    print("[green] ✅ Deleted temporary file [/green]")
 
+    outputDirSrtFile = outputDir + 'video_subtitles.srt'
+    
+    print("[green] ✅ Output directory: ", outputDirSrtFile)
+    
+    # Save the SRT file to disk in the same directory as the input file    
+    with open(outputDirSrtFile, 'w') as file:
+        file.write(srt_content)
+        
+        
+    add_subtitles_to_video(video_file_path, outputDirSrtFile, outputDir)
