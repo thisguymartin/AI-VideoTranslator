@@ -1,3 +1,7 @@
+
+![DALL·E 2024-01-15 19 42 01 - Modify the first banner image previously generated, representing the conversion from audio to subtitles for _AI-VideoTranslator_, by removing any text](https://github.com/thisguymartin/AI-VideoTranslator/assets/13192083/f922781b-518b-461e-9a5a-6257fcba55fb)
+
+
 # AI-VideoTranslator
 
 ## Objective
