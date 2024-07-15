@@ -46,7 +46,7 @@ requests @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/reque
 rich @ file:///home/conda/feedstock_root/build_artifacts/rich-split_1700160075651/work/dist
 rsa @ file:///tmp/build/80754af9/rsa_1614366226499/work
 s3transfer @ file:///tmp/build/80754af9/s3transfer_1626435152308/work
-setuptools==68.2.2
+setuptools==70.0.0
 shellingham @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/shellingham_1699238695807/work
 six @ file:///tmp/build/80754af9/six_1644875935023/work
 tqdm @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/tqdm_1701805884490/work
