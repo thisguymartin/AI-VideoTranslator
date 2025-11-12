@@ -134,3 +134,18 @@ cython_debug/
 
 # VS Code
 .vscode/
+
+# Modern Python tools
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+.uv/
+
+# Generated files
+*.srt
+*.wav
+*.mp3
+*_subtitled.mp4
+
+# Whisper models cache
+~/.cache/whisper/
