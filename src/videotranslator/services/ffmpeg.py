@@ -74,6 +74,7 @@ class FFmpegService:
         video_path: Path,
         subtitle_path: Path,
         output_path: Optional[Path] = None,
+        burn_in: bool = False,
     ) -> Path:
         """
         Add subtitles to a video file.
@@ -82,6 +83,8 @@ class FFmpegService:
             video_path: Path to the input video file
             subtitle_path: Path to the SRT subtitle file
             output_path: Optional output path for the video with subtitles
+            burn_in: If True, burn subtitles into video (always visible).
+                    If False, embed as separate stream (selectable in player).
 
         Returns:
             Path to the output video file
@@ -99,28 +102,55 @@ class FFmpegService:
         if output_path is None:
             output_path = video_path.parent / f"{video_path.stem}_subtitled{video_path.suffix}"
 
-        logger.info(f"Adding subtitles to {video_path.name}")
+        logger.info(
+            f"Adding subtitles to {video_path.name} "
+            f"(mode: {'burn-in' if burn_in else 'embedded stream'})"
+        )
 
         try:
-            # Use list-based subprocess call for security (no shell injection)
-            # This is safer than shell=True
-            cmd = [
-                "ffmpeg",
-                "-i",
-                str(video_path),
-                "-i",
-                str(subtitle_path),
-                "-c:v",
-                "copy",  # Copy video codec (no re-encoding)
-                "-c:a",
-                "copy",  # Copy audio codec
-                "-c:s",
-                settings.subtitle_codec,
-                "-metadata:s:s:0",
-                f"language={settings.language}",
-                "-y",  # Overwrite output file
-                str(output_path),
-            ]
+            if burn_in:
+                # Burn subtitles into video (hardcoded, always visible)
+                # This requires re-encoding the video
+                # Convert Windows paths for FFmpeg's subtitles filter
+                subtitle_path_str = str(subtitle_path).replace('\\', '/').replace(':', '\\:')
+
+                cmd = [
+                    "ffmpeg",
+                    "-i",
+                    str(video_path),
+                    "-vf",
+                    f"subtitles={subtitle_path_str}",
+                    "-c:v",
+                    settings.video_codec,  # Re-encode video
+                    "-c:a",
+                    "copy",  # Copy audio codec
+                    "-y",  # Overwrite output file
+                    str(output_path),
+                ]
+            else:
+                # Embed subtitles as separate stream (soft subs, selectable in player)
+                # Mark subtitle as default and forced for better compatibility
+                cmd = [
+                    "ffmpeg",
+                    "-i",
+                    str(video_path),
+                    "-i",
+                    str(subtitle_path),
+                    "-c:v",
+                    "copy",  # Copy video codec (no re-encoding)
+                    "-c:a",
+                    "copy",  # Copy audio codec
+                    "-c:s",
+                    settings.subtitle_codec,
+                    "-disposition:s:0",
+                    "default",  # Mark subtitle stream as default
+                    "-metadata:s:s:0",
+                    f"language={settings.language}",
+                    "-metadata:s:s:0",
+                    "title=English",  # Add title for better player support
+                    "-y",  # Overwrite output file
+                    str(output_path),
+                ]
 
             result = subprocess.run(
                 cmd,

@@ -80,6 +80,12 @@ def transcribe(
         "-a",
         help="Add subtitles to video file",
     ),
+    burn_in_subtitles: bool = typer.Option(
+        False,
+        "--burn-in",
+        "-b",
+        help="Burn subtitles into video (always visible, requires re-encoding)",
+    ),
     keep_audio: bool = typer.Option(
         False,
         "--keep-audio",
@@ -146,7 +152,9 @@ def transcribe(
         if add_to_video:
             progress_manager.info("Step 3/3: Adding subtitles to video...")
             output_video = output_dir / f"{video_path.stem}_subtitled{video_path.suffix}"
-            output_video = ffmpeg_service.add_subtitles(video_path, srt_path, output_video)
+            output_video = ffmpeg_service.add_subtitles(
+                video_path, srt_path, output_video, burn_in=burn_in_subtitles
+            )
             progress_manager.success(f"Video with subtitles: {output_video.name}")
         else:
             progress_manager.success("Skipping video subtitle addition")
@@ -242,15 +250,30 @@ def add_subtitles(
         dir_okay=False,
         resolve_path=True,
     ),
+    burn_in: bool = typer.Option(
+        False,
+        "--burn-in",
+        "-b",
+        help="Burn subtitles into video (always visible, requires re-encoding)",
+    ),
 ):
-    """Add subtitles to a video file."""
+    """
+    Add subtitles to a video file.
+
+    Two modes:
+    - Default: Embed subtitles as separate stream (selectable in player, fast)
+    - --burn-in: Burn subtitles into video frames (always visible, slower)
+    """
     try:
         from videotranslator.services import FFmpegService
 
-        progress_manager.info(f"Adding subtitles to: {video_path.name}")
+        mode = "burn-in" if burn_in else "embedded stream"
+        progress_manager.info(f"Adding subtitles to: {video_path.name} (mode: {mode})")
 
         ffmpeg_service = FFmpegService()
-        output_video = ffmpeg_service.add_subtitles(video_path, subtitle_path, output_path)
+        output_video = ffmpeg_service.add_subtitles(
+            video_path, subtitle_path, output_path, burn_in=burn_in
+        )
 
         progress_manager.success(f"Video with subtitles: {output_video}")
 
