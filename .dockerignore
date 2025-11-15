@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+BLOG.md
+TRANSLATION_GUIDE.md
+
+# Test files
+tests/
+*.mp4
+*.srt
+*.wav
+*.mp3
+
+# Misc
+.DS_Store
+.env
+*.lock
+uv.lock
