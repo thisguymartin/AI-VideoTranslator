@@ -8,6 +8,7 @@ Modern CLI tool for video transcription and subtitle generation using **open-sou
 ## ✨ Features
 
 - 🆓 **100% Open Source** - Uses OpenAI's Whisper model (no API keys or cloud costs!)
+- 🌐 **Subtitle Translation** - Translate subtitles with LibreTranslate (open-source, self-hosted)
 - 🚀 **Fast & Modern** - Built with modern Python tooling (`uv`, `typer`, `rich`)
 - 🎯 **Simple CLI** - Easy-to-use command-line interface with progress bars
 - 🌍 **Multilingual** - Supports 99+ languages with auto-detection
@@ -31,6 +32,7 @@ Modern CLI tool for video transcription and subtitle generation using **open-sou
 - Python 3.10+
 - FFmpeg (for video processing)
 - `uv` (modern Python package manager)
+- Docker & Docker Compose (for LibreTranslate translation service)
 
 ### Install FFmpeg
 
@@ -88,7 +90,20 @@ cp .env.example .env
 # nano .env
 ```
 
-### 4. Run your first transcription!
+### 4. Start LibreTranslate (for subtitle translation)
+
+```bash
+# Start LibreTranslate in Docker
+docker-compose up -d
+
+# Check if it's running (wait ~1 minute for first startup)
+curl http://localhost:5000/languages
+
+# View logs
+docker-compose logs -f libretranslate
+```
+
+### 5. Run your first transcription!
 
 ```bash
 # Basic usage - transcribe a video
@@ -206,6 +221,81 @@ VIDEOTRANSLATOR_SUBTITLE_CODEC=mov_text
 VIDEOTRANSLATOR_LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR
 ```
 
+## 🌐 Translation with LibreTranslate
+
+### Using LibreTranslate
+
+LibreTranslate is a free, open-source translation API that runs locally in Docker.
+
+#### Start the Translation Service
+
+```bash
+# Start LibreTranslate
+docker-compose up -d
+
+# Check service health
+curl http://localhost:5000/health
+
+# List supported languages
+curl http://localhost:5000/languages
+```
+
+#### Translate Subtitles
+
+```python
+from videotranslator.services.translator import LibreTranslateClient
+
+# Initialize client
+client = LibreTranslateClient(host="http://localhost:5000")
+
+# Check health
+if client.health_check():
+    # Translate text
+    translated = client.translate_sync(
+        "Hello, how are you?",
+        source="en",
+        target="es"
+    )
+    print(translated)  # "Hola, ¿cómo estás?"
+
+    # Detect language
+    detection = client.detect_language("Bonjour!")
+    print(detection)  # {'language': 'fr', 'confidence': 0.99}
+```
+
+#### Translate SRT Files
+
+```bash
+# Run the example script
+python examples/translate_example.py
+
+# Translate a subtitle file
+python examples/translate_example.py \
+    --srt input.srt \
+    --output output_spanish.srt \
+    --source en \
+    --target es
+```
+
+#### Supported Languages
+
+LibreTranslate supports 100+ languages including:
+- English (en), Spanish (es), French (fr), German (de)
+- Chinese (zh), Japanese (ja), Korean (ko)
+- Arabic (ar), Russian (ru), Portuguese (pt)
+- Italian (it), Dutch (nl), Polish (pl)
+- And many more!
+
+See all languages: `curl http://localhost:5000/languages`
+
+#### Configuration Options
+
+Edit `docker-compose.yml` to customize:
+- `LT_WORKERS`: Number of worker threads (default: 1)
+- `LT_CHAR_LIMIT`: Max characters per request (default: 50000)
+- `LT_API_KEYS`: Set API keys for authentication
+- Resource limits (CPU/Memory)
+
 ## 🎯 Examples
 
 ### Example 1: Quick Transcription
@@ -250,6 +340,25 @@ videotranslator transcribe video_es.mp4 -l es --add-to-video
 for video in *.mp4; do
     videotranslator transcribe "$video" --add-to-video -o ./processed
 done
+```
+
+### Example 6: Complete Workflow with Translation
+
+```bash
+# 1. Start LibreTranslate
+docker-compose up -d
+
+# 2. Transcribe video (creates English SRT)
+videotranslator transcribe lecture.mp4 -o ./output
+
+# 3. Translate subtitles to Spanish
+python examples/translate_example.py \
+    --srt ./output/lecture.srt \
+    --output ./output/lecture_es.srt \
+    --target es
+
+# 4. Add translated subtitles to video
+videotranslator add-subtitles lecture.mp4 ./output/lecture_es.srt -o lecture_spanish.mp4
 ```
 
 ## 🛠️ Development
@@ -334,6 +443,7 @@ Contributions welcome! Please:
 ## 🙏 Acknowledgments
 
 - [OpenAI Whisper](https://github.com/openai/whisper) - Open-source speech recognition
+- [LibreTranslate](https://github.com/LibreTranslate/LibreTranslate) - Open-source translation API
 - [FFmpeg](https://ffmpeg.org/) - Video processing
 - [Typer](https://typer.tiangolo.com/) - CLI framework
 - [Rich](https://rich.readthedocs.io/) - Terminal formatting

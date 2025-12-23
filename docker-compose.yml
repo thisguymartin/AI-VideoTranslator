@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    container_name: videotranslator-libretranslate
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # API Key (set to empty for no authentication, or set a custom key)
+      LT_API_KEYS: ""
+
+      # Disable API key requirement (set to true for open access during development)
+      LT_REQUIRE_API_KEY_ORIGIN: ""
+
+      # Number of workers (adjust based on your CPU cores)
+      LT_WORKERS: 1
+
+      # Enable/disable suggestions
+      LT_SUGGESTIONS: "false"
+
+      # Disable web UI (optional - set to true to disable)
+      LT_DISABLE_WEB_UI: "false"
+
+      # Debug mode
+      LT_DEBUG: "false"
+
+      # Frontend timeout
+      LT_FRONTEND_TIMEOUT: 500
+
+      # Character limit per request
+      LT_CHAR_LIMIT: 50000
+
+      # Batch limit
+      LT_BATCH_LIMIT: 100
+
+      # GA ID (Google Analytics - leave empty to disable)
+      LT_GA_ID: ""
+
+      # Update models on startup (set to false after first run for faster startup)
+      LT_UPDATE_MODELS: "true"
+    volumes:
+      # Persist downloaded models and cache
+      - libretranslate-data:/home/libretranslate/.local
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Resource limits (adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+volumes:
+  libretranslate-data:
+    driver: local
