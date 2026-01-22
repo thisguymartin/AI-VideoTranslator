@@ -53,5 +53,5 @@ tqdm @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/tqdm_1701
 typer @ file:///home/conda/feedstock_root/build_artifacts/typer_1683029246636/work
 typing_extensions @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/typing_extensions_1699237056256/work
 urllib3 @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/urllib3_1699237745193/work
-wheel==0.41.2
+wheel==0.46.2
 yarl @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a8s46tbbn5/croot/yarl_1701105147904/work
