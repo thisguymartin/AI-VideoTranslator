@@ -34,7 +34,7 @@ numpy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_cfbb
 Pillow @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pillow_1699239265580/work
 proglog==0.1.9
 proto-plus @ file:///home/conda/feedstock_root/build_artifacts/proto-plus_1702003338643/work
-protobuf==3.20.3
+protobuf==5.29.6
 pyasn1 @ file:///Users/ktietz/demo/mc3/conda-bld/pyasn1_1629708007385/work
 pyasn1-modules==0.2.8
 pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
