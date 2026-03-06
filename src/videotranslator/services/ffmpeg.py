@@ -9,6 +9,22 @@ import ffmpeg
 from videotranslator.config import settings
 from videotranslator.logger import logger
 
+# ISO 639-1 (2-letter) to ISO 639-2 (3-letter) mapping for FFmpeg language tags
+_ISO_639_1_TO_2: dict[str, str] = {
+    "en": "eng", "es": "spa", "fr": "fra", "de": "deu", "it": "ita",
+    "pt": "por", "zh": "zho", "ja": "jpn", "ko": "kor", "ar": "ara",
+    "ru": "rus", "nl": "nld", "pl": "pol", "sv": "swe", "da": "dan",
+    "fi": "fin", "no": "nor", "tr": "tur", "uk": "ukr", "cs": "ces",
+    "hu": "hun", "ro": "ron", "bg": "bul", "hr": "hrv", "sk": "slk",
+    "sl": "slv", "el": "ell", "he": "heb", "id": "ind", "ms": "msa",
+    "th": "tha", "vi": "vie", "hi": "hin", "bn": "ben", "fa": "fas",
+}
+
+
+def _to_iso639_2(code: str) -> str:
+    """Convert ISO 639-1 (2-letter) to ISO 639-2 (3-letter) language code."""
+    return _ISO_639_1_TO_2.get(code.lower(), code)
+
 
 class FFmpegService:
     """Service for FFmpeg operations with improved error handling and security."""
@@ -164,6 +180,62 @@ class FFmpegService:
 
         except subprocess.CalledProcessError as e:
             logger.error(f"FFmpeg error during subtitle addition: {e.stderr}")
+            raise
+
+    @staticmethod
+    def add_multi_subtitles(
+        video_path: Path,
+        subtitle_tracks: list[tuple[Path, str]],
+        output_path: Optional[Path] = None,
+    ) -> Path:
+        """
+        Add multiple subtitle tracks to a video file in a single FFmpeg pass.
+
+        Args:
+            video_path: Path to the input video file
+            subtitle_tracks: List of (srt_path, language_code) tuples
+            output_path: Optional output path for the video with subtitles
+
+        Returns:
+            Path to the output video file
+
+        Raises:
+            FileNotFoundError: If video or any subtitle file doesn't exist
+            subprocess.CalledProcessError: If FFmpeg fails
+        """
+        if not video_path.exists():
+            raise FileNotFoundError(f"Video file not found: {video_path}")
+        for srt_path, _ in subtitle_tracks:
+            if not srt_path.exists():
+                raise FileNotFoundError(f"Subtitle file not found: {srt_path}")
+
+        if output_path is None:
+            output_path = video_path.parent / f"{video_path.stem}_subtitled{video_path.suffix}"
+
+        logger.info(f"Adding {len(subtitle_tracks)} subtitle track(s) to {video_path.name}")
+
+        try:
+            cmd = ["ffmpeg", "-i", str(video_path)]
+            for srt_path, _ in subtitle_tracks:
+                cmd += ["-i", str(srt_path)]
+
+            cmd += ["-c:v", "copy", "-c:a", "copy"]
+
+            for i, (_, lang_code) in enumerate(subtitle_tracks):
+                iso3 = _to_iso639_2(lang_code)
+                cmd += [
+                    f"-c:s:{i}", settings.subtitle_codec,
+                    f"-metadata:s:s:{i}", f"language={iso3}",
+                ]
+
+            cmd += ["-y", str(output_path)]
+
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            logger.info(f"Multi-track subtitles added successfully: {output_path}")
+            return output_path
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"FFmpeg error during multi-track subtitle addition: {e.stderr}")
             raise
 
     @staticmethod
