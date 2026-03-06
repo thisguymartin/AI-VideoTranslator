@@ -227,7 +227,8 @@ def transcribe(
             elif translated_srts:
                 # Single translation, no multi-track: embed the translated SRT
                 output_video = ffmpeg_service.add_subtitles(
-                    video_path, translated_srts[0][0], output_video
+                    video_path, translated_srts[0][0], output_video,
+                    burn_in=burn_in_subtitles,
                 )
             else:
                 # No translation: embed source SRT
