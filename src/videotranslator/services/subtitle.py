@@ -43,8 +43,15 @@ class SubtitleService:
         # Read SRT content
         srt_content = srt_path.read_text(encoding="utf-8")
 
-        # Convert to VTT (simple conversion)
-        vtt_content = "WEBVTT\n\n" + srt_content.replace(",", ".")
+        # Convert to VTT: only replace commas in timestamp lines (SRT: 00:00:01,000 → VTT: 00:00:01.000)
+        # so subtitle text like "Hello, world!" is preserved
+        lines = srt_content.split("\n")
+        vtt_lines = []
+        for line in lines:
+            if " --> " in line:
+                line = line.replace(",", ".")
+            vtt_lines.append(line)
+        vtt_content = "WEBVTT\n\n" + "\n".join(vtt_lines)
 
         # Save VTT file
         output_path.write_text(vtt_content, encoding="utf-8")

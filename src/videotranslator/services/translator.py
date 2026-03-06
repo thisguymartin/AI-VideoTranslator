@@ -4,9 +4,7 @@ LibreTranslate integration for subtitle translation.
 
 import httpx
 from typing import Optional, List
-from ..logger import get_logger
-
-logger = get_logger(__name__)
+from ..logger import logger
 
 
 class TranslationError(Exception):

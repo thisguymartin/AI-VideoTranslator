@@ -121,6 +121,20 @@ videotranslator transcribe video.mp4 -m medium
 
 ## 📖 Usage
 
+### Workflow Diagram
+
+```
+Video --> [extract audio] --> Audio --> [Whisper] --> SRT (source lang)
+                                                          |
+                                                   --translate-to
+                                                          |
+                                              SRT_es / SRT_fr / SRT_de
+                                                          |
+                                                   --add-to-video
+                                                          |
+                                              Video + multi-track subtitles
+```
+
 ### Main Commands
 
 #### Transcribe a Video
@@ -143,6 +157,40 @@ videotranslator transcribe video.mp4 -l en
 
 # Use different Whisper model
 videotranslator transcribe video.mp4 -m large
+
+# Transcribe and translate in one shot
+videotranslator transcribe video.mp4 --translate-to es --add-to-video
+
+# Multi-language: generates SRTs for each language + multi-track video
+videotranslator transcribe video.mp4 \
+  --translate-to es --translate-to fr --translate-to de \
+  --add-to-video --multi-track
+```
+
+#### Translate Subtitles
+
+```bash
+# Translate an SRT file to Spanish
+videotranslator translate subtitles.srt --target es
+
+# Translate to multiple languages at once
+videotranslator translate subtitles.srt --target es --target fr --target de
+
+# Specify source language and output directory
+videotranslator translate subtitles.srt --source en --target ja -o ./output
+
+# Use a remote LibreTranslate instance
+videotranslator translate subtitles.srt --target es --host http://my-server:5000
+```
+
+#### List Supported Languages
+
+```bash
+# Show all languages supported by LibreTranslate
+videotranslator languages
+
+# Use a specific server
+videotranslator languages --host http://my-server:5000
 ```
 
 #### Extract Audio Only
@@ -263,18 +311,26 @@ if client.health_check():
     print(detection)  # {'language': 'fr', 'confidence': 0.99}
 ```
 
-#### Translate SRT Files
+#### Translate SRT Files via CLI
 
 ```bash
-# Run the example script
-python examples/translate_example.py
+# Translate a subtitle file to Spanish
+videotranslator translate input.srt --target es
 
-# Translate a subtitle file
-python examples/translate_example.py \
-    --srt input.srt \
-    --output output_spanish.srt \
-    --source en \
-    --target es
+# Translate to multiple languages
+videotranslator translate input.srt --target es --target fr --target de
+
+# Specify source language and output directory
+videotranslator translate input.srt --source en --target es -o ./output
+
+# List all supported languages
+videotranslator languages
+```
+
+#### Batch Translate a Folder
+
+```bash
+python examples/batch_translate.py ./subtitles --target es --target fr
 ```
 
 #### Supported Languages
@@ -342,24 +398,38 @@ for video in *.mp4; do
 done
 ```
 
-### Example 6: Complete Workflow with Translation
+### Example 6: One-Shot Transcribe and Translate
 
 ```bash
-# 1. Start LibreTranslate
+# Start LibreTranslate
 docker-compose up -d
 
-# 2. Transcribe video (creates English SRT)
-videotranslator transcribe lecture.mp4 -o ./output
-
-# 3. Translate subtitles to Spanish
-python examples/translate_example.py \
-    --srt ./output/lecture.srt \
-    --output ./output/lecture_es.srt \
-    --target es
-
-# 4. Add translated subtitles to video
-videotranslator add-subtitles lecture.mp4 ./output/lecture_es.srt -o lecture_spanish.mp4
+# Transcribe and translate to Spanish in a single command
+videotranslator transcribe lecture.mp4 --translate-to es --add-to-video -o ./output
 ```
+
+**Output:**
+- `output/lecture.srt` - Original subtitle file
+- `output/lecture_es.srt` - Spanish translation
+- `output/lecture_subtitled.mp4` - Video with Spanish subtitles
+
+### Example 7: Multi-Language in One Command
+
+```bash
+# Start LibreTranslate
+docker-compose up -d
+
+# Transcribe + translate to 3 languages + embed all as selectable tracks
+videotranslator transcribe lecture.mp4 \
+  --translate-to es --translate-to fr --translate-to de \
+  --add-to-video --multi-track \
+  -o ./output
+```
+
+**Output:**
+- `output/lecture.srt` - Original (English)
+- `output/lecture_es.srt`, `output/lecture_fr.srt`, `output/lecture_de.srt`
+- `output/lecture_subtitled.mp4` - Video with EN + ES + FR + DE selectable subtitle tracks
 
 ## 🛠️ Development
 
@@ -393,17 +463,32 @@ pytest
 
 ```
 src/videotranslator/
-├── cli.py              # Main CLI interface
+├── cli.py              # Main CLI interface (transcribe, translate, languages, ...)
 ├── config.py           # Configuration management
 ├── logger.py           # Logging setup
 ├── models/             # Data models
 │   └── transcription.py
 ├── services/           # Core services
 │   ├── whisper.py      # Whisper AI integration
-│   ├── ffmpeg.py       # Video/audio processing
-│   └── subtitle.py     # Subtitle generation
+│   ├── ffmpeg.py       # Video/audio processing (incl. multi-track subtitles)
+│   ├── subtitle.py     # Subtitle generation & conversion
+│   └── translator.py   # LibreTranslate client
 └── ui/                 # Terminal UI
     └── progress.py     # Progress bars & status
+
+tests/
+├── conftest.py         # Shared fixtures
+├── test_models.py      # TranscriptionResult / SubtitleSegment
+├── test_translator.py  # LibreTranslateClient (mocked with respx)
+└── test_subtitle.py    # SubtitleService
+
+docs/
+├── quickstart.md       # 5-step getting-started guide
+└── commands.md         # Full command reference
+
+examples/
+├── translate_example.py    # LibreTranslate usage demo
+└── batch_translate.py      # Batch-translate a folder of SRTs
 ```
 
 ## 🔄 Migrating from Old Version

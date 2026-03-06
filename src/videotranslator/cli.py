@@ -1,10 +1,11 @@
 """Modern CLI interface for AI VideoTranslator."""
 
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import typer
 from rich.console import Console
+from rich.table import Table
 
 from videotranslator import __version__
 from videotranslator.config import settings
@@ -41,6 +42,40 @@ def main(
 ):
     """AI VideoTranslator - Transcribe videos with open-source AI."""
     pass
+
+
+def _translate_srt(
+    srt_path: Path,
+    output_path: Path,
+    source: str,
+    target: str,
+    host: str,
+    api_key: Optional[str] = None,
+) -> Path:
+    """Translate an SRT file and write the result to output_path."""
+    from videotranslator.services.translator import LibreTranslateClient, TranslationError
+
+    client = LibreTranslateClient(host=host, api_key=api_key)
+    content = srt_path.read_text(encoding="utf-8")
+    blocks = content.strip().split("\n\n")
+    translated_blocks = []
+
+    for block in blocks:
+        lines = block.split("\n")
+        if len(lines) >= 3:
+            number = lines[0]
+            timestamp = lines[1]
+            text = "\n".join(lines[2:])
+            try:
+                translated_text = client.translate_sync(text, source, target)
+                translated_blocks.append(f"{number}\n{timestamp}\n{translated_text}")
+            except TranslationError:
+                translated_blocks.append(block)
+        else:
+            translated_blocks.append(block)
+
+    output_path.write_text("\n\n".join(translated_blocks), encoding="utf-8")
+    return output_path
 
 
 @app.command("transcribe")
@@ -92,6 +127,26 @@ def transcribe(
         "-k",
         help="Keep extracted audio file",
     ),
+    translate_to: Optional[List[str]] = typer.Option(
+        None,
+        "--translate-to",
+        help="Translate subtitles to language code(s). Can be specified multiple times.",
+    ),
+    translate_host: str = typer.Option(
+        "http://localhost:5000",
+        "--translate-host",
+        help="LibreTranslate server URL",
+    ),
+    translate_api_key: Optional[str] = typer.Option(
+        None,
+        "--translate-api-key",
+        help="LibreTranslate API key if required",
+    ),
+    multi_track: bool = typer.Option(
+        False,
+        "--multi-track",
+        help="Embed all subtitle languages as separate selectable tracks (requires --add-to-video)",
+    ),
 ):
     """
     Transcribe a video file and generate subtitles using Whisper (open-source).
@@ -100,21 +155,18 @@ def transcribe(
     1. Extracts audio from the video
     2. Transcribes audio using Whisper AI
     3. Generates SRT subtitle file
-    4. Optionally adds subtitles to the video
+    4. Optionally translates to one or more languages (--translate-to)
+    5. Optionally adds subtitles to the video (--add-to-video)
     """
     try:
-        # Lazy imports for heavy dependencies
         from videotranslator.services import FFmpegService, WhisperService
 
-        # Set up output directory
         if output_dir is None:
             output_dir = video_path.parent
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Show initial status
         progress_manager.info(f"Processing video: {video_path.name}")
 
-        # Get video info
         ffmpeg_service = FFmpegService()
         video_info = ffmpeg_service.get_video_info(video_path)
         progress_manager.status_table(
@@ -148,13 +200,41 @@ def transcribe(
             f"Language: {transcription.language}"
         )
 
+        # Step 2.5: Translate to target languages
+        translated_srts: list[tuple[Path, str]] = []
+        if translate_to:
+            source_lang = language or transcription.language or "auto"
+            progress_manager.info(f"Translating subtitles to: {', '.join(translate_to)}")
+            for target_lang in translate_to:
+                translated_path = output_dir / f"{video_path.stem}_{target_lang}.srt"
+                _translate_srt(
+                    srt_path, translated_path, source_lang, target_lang,
+                    translate_host, translate_api_key,
+                )
+                translated_srts.append((translated_path, target_lang))
+                progress_manager.success(f"Translated to {target_lang}: {translated_path.name}")
+
         # Step 3: Add subtitles to video if requested
+        output_video: Optional[Path] = None
         if add_to_video:
             progress_manager.info("Step 3/3: Adding subtitles to video...")
             output_video = output_dir / f"{video_path.stem}_subtitled{video_path.suffix}"
-            output_video = ffmpeg_service.add_subtitles(
-                video_path, srt_path, output_video, burn_in=burn_in_subtitles
-            )
+
+            if translated_srts and (multi_track or len(translated_srts) > 1):
+                # Multi-track: embed source + all translations as separate tracks
+                tracks = [(srt_path, transcription.language or "en")] + translated_srts
+                output_video = ffmpeg_service.add_multi_subtitles(video_path, tracks, output_video)
+            elif translated_srts:
+                # Single translation, no multi-track: embed the translated SRT
+                output_video = ffmpeg_service.add_subtitles(
+                    video_path, translated_srts[0][0], output_video,
+                    burn_in=burn_in_subtitles,
+                )
+            else:
+                # No translation: embed source SRT
+                output_video = ffmpeg_service.add_subtitles(
+                    video_path, srt_path, output_video, burn_in=burn_in_subtitles
+                )
             progress_manager.success(f"Video with subtitles: {output_video.name}")
         else:
             progress_manager.success("Skipping video subtitle addition")
@@ -165,20 +245,151 @@ def transcribe(
             logger.info(f"Removed temporary audio file: {audio_path}")
 
         # Final summary
-        progress_manager.status_table(
-            "Output Files",
-            {
-                "Subtitle File": str(srt_path),
-                "Video with Subtitles": str(output_video) if add_to_video else "Not created",
-                "Audio File": str(audio_path) if keep_audio else "Removed",
-            },
-        )
+        summary: dict[str, str] = {"Subtitle File": str(srt_path)}
+        for path, lang in translated_srts:
+            summary[f"Subtitle ({lang})"] = str(path)
+        summary["Video with Subtitles"] = str(output_video) if output_video else "Not created"
+        summary["Audio File"] = str(audio_path) if keep_audio else "Removed"
+        progress_manager.status_table("Output Files", summary)
 
-        progress_manager.success("All done! 🎉")
+        progress_manager.success("All done!")
 
     except Exception as e:
         progress_manager.error(f"Error: {e}")
         logger.exception("Transcription failed")
+        raise typer.Exit(code=1)
+
+
+@app.command("translate")
+def translate_subtitles(
+    srt_path: Path = typer.Argument(
+        ...,
+        help="Path to the SRT subtitle file to translate",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        resolve_path=True,
+    ),
+    target: List[str] = typer.Option(
+        ...,
+        "--target",
+        "-t",
+        help="Target language code(s). Can be specified multiple times.",
+    ),
+    source: str = typer.Option(
+        "auto",
+        "--source",
+        "-s",
+        help="Source language code (default: auto-detect)",
+    ),
+    output_dir: Optional[Path] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output directory for translated SRT files (default: same as input)",
+        file_okay=False,
+        dir_okay=True,
+        resolve_path=True,
+    ),
+    host: str = typer.Option(
+        "http://localhost:5000",
+        "--host",
+        help="LibreTranslate server URL",
+    ),
+    api_key: Optional[str] = typer.Option(
+        None,
+        "--api-key",
+        help="LibreTranslate API key if required",
+    ),
+):
+    """
+    Translate an SRT subtitle file to one or more languages.
+
+    Examples:
+
+        videotranslator translate subtitles.srt --target es
+
+        videotranslator translate subtitles.srt --target es --target fr --target de
+
+        videotranslator translate subtitles.srt --source en --target fr -o output/
+    """
+    try:
+        from videotranslator.services.translator import LibreTranslateClient
+
+        out_dir = output_dir or srt_path.parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        client = LibreTranslateClient(host=host, api_key=api_key)
+        if not client.health_check():
+            progress_manager.error(
+                f"LibreTranslate server not reachable at {host}. "
+                "Start it with: docker-compose up -d"
+            )
+            raise typer.Exit(code=1)
+
+        progress_manager.info(f"Translating: {srt_path.name} -> {', '.join(target)}")
+
+        output_files: list[tuple[str, Path]] = []
+        for target_lang in target:
+            output_path = out_dir / f"{srt_path.stem}_{target_lang}.srt"
+            progress_manager.info(f"Translating to {target_lang}...")
+            _translate_srt(srt_path, output_path, source, target_lang, host, api_key)
+            output_files.append((target_lang, output_path))
+            progress_manager.success(f"Saved: {output_path.name}")
+
+        progress_manager.status_table(
+            "Translation Results",
+            {lang: str(path) for lang, path in output_files},
+        )
+        progress_manager.success("Translation complete!")
+
+    except typer.Exit:
+        raise
+    except Exception as e:
+        progress_manager.error(f"Error: {e}")
+        logger.exception("Translation failed")
+        raise typer.Exit(code=1)
+
+
+@app.command("languages")
+def list_languages(
+    host: str = typer.Option(
+        "http://localhost:5000",
+        "--host",
+        help="LibreTranslate server URL",
+    ),
+    api_key: Optional[str] = typer.Option(
+        None,
+        "--api-key",
+        help="LibreTranslate API key if required",
+    ),
+):
+    """Show all languages supported by the LibreTranslate server."""
+    try:
+        from videotranslator.services.translator import LibreTranslateClient
+
+        client = LibreTranslateClient(host=host, api_key=api_key)
+        progress_manager.info(f"Fetching languages from {host}...")
+        languages = client.get_languages()
+
+        table = Table(
+            title=f"Supported Languages ({host})",
+            show_header=True,
+            header_style="bold magenta",
+        )
+        table.add_column("Code", style="cyan", width=8)
+        table.add_column("Language", style="white", width=30)
+
+        for lang in sorted(languages, key=lambda x: x.get("name", "")):
+            table.add_row(lang.get("code", ""), lang.get("name", ""))
+
+        console.print(table)
+        console.print(f"\n[bold green]Total:[/bold green] {len(languages)} languages")
+
+    except Exception as e:
+        progress_manager.error(f"Error: {e}")
+        progress_manager.error("Make sure LibreTranslate is running: docker-compose up -d")
+        logger.exception("Failed to fetch languages")
         raise typer.Exit(code=1)
 
 
@@ -286,7 +497,6 @@ def add_subtitles(
 @app.command("models")
 def list_models():
     """Show available Whisper models and their specifications."""
-    from rich.table import Table
     from videotranslator.services import WhisperService
 
     table = Table(title="Available Whisper Models", show_header=True, header_style="bold magenta")
